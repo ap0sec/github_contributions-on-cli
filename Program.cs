@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using AngleSharp.Parser.Html;
-using AngleSharp.Parser.Css;
-using System.Text;
 using System.Threading.Tasks;
 using AngleSharp.Dom.Html;
 
@@ -19,7 +15,7 @@ namespace github_grass
         {
             try
             {
-                sampleAsync();
+                sampleAsync().Wait();
             }
             catch(Exception ex)
             {
@@ -33,7 +29,7 @@ namespace github_grass
 
             Console.WriteLine("async");
 
-            //そもそもパースしてくるのはHTMLでいいのか不明。調査中
+            //HTMLをストリームで持ってくる
             var doc = default(IHtmlDocument);
             using (var stream = await client.GetStreamAsync(new Uri(url)))
             {
@@ -41,10 +37,12 @@ namespace github_grass
                 doc = await parser.ParseAsync(stream);
             }
 
-            //ここから先がいまいちわかってない
-            var title = doc.QuerySelectorAll("svg");
-
-            Console.WriteLine(title);
+            //日付とカウントを表示
+            foreach (var item in doc.QuerySelectorAll("g > rect"))
+            {
+                Console.Write(item.Attributes["data-date"].Value + ":");
+                Console.WriteLine(item.Attributes["data-count"].Value);               
+            }
         }
 
     }
